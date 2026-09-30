@@ -9,3 +9,6 @@ plotly
 xgboost
 fastapi
 uvicorn
+git
+xgboost==2.1.4
+ip
