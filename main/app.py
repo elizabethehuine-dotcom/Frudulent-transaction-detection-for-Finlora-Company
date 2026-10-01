@@ -38,6 +38,7 @@ async def startup_event():
         print("error occured during loading of historical dataset {e}")
         historical_data = None
 
+# what the API is expecting from the user as an input
 class TransactionData(BaseModel):
     timestamp: str
     home_country: str
@@ -56,7 +57,7 @@ class TransactionData(BaseModel):
     risk_score_internal: float
     corridor_risk: float
        
-
+# what the API is expecting from the user as an output or response
 class PredictionResonse(BaseModel):
     is_fraud: int
     fraud_probability: float
@@ -65,4 +66,11 @@ class PredictionResonse(BaseModel):
     velocity_spike: Optional[int] = None
     amount_usd: Optional[float] = None
 
+# creating the predict API so that our model can get users request and make prediction
+@app.post("/predict", response_model=PredictionResonse)
+async def predict(transaction: TransactionData):
+    global model, historical_data
+
+    if model= None
+    
 
