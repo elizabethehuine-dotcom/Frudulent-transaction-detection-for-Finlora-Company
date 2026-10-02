@@ -30,12 +30,12 @@ def load_historical_data(csv_path):
     print(f"loaded {len(historical_data)}")
     print(f"found {historical_data['customer_id'].nunique()} unique customers")
 
-    def add_transaction_to_cache(customer_id, timestamp, amount_src, amount_usd):
+def add_transaction_to_cache(customer_id, timestamp, amount_src, amount_usd):
         """
         add a transaction to the cache for velocity spike signal.
         """
 
-    global transaction_cache
+        global transaction_cache
 
 if 'customer_id' not in transaction_cache:
     transaction_cache['customer_id'] = []
@@ -64,7 +64,6 @@ def get_velocity_for_customer(customer_id, current_time):
 
     customer_tnxs = historical_data[historical_data['customer_id'] == customer_id]
 
-
     historical_timestamp = customer_tnxs['timestamp'].tolist() if not customer_tnxs.empty else []
     cache_tnxs = transaction_cache.get(customer_id, [])
     cache_timestamps = [txn['timestamp'] for txn in cache_tnxs]
@@ -85,12 +84,13 @@ def engineer_feature(data):
 
     df = data.copy()
 
-    if 'amount_usd' not in df.columns or df['amount_usd'].isnull().any():
+    if 'amount_usd' not in df.columns or df['amount_usd'].isna().all():
         df['amount_usd'] = df.apply(
-            lambda row: calculate_amount_usd(row['amount_src'], row['source_currency'])
+            lambda row: calculate_amount_usd(row['amount_src'], row['source_currency']),
+            axis = 1
         )
 
-    if 'timstamp' in df.columns:
+    if 'timestamp' in df.columns:
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         if df['timestamp'].dt.tz is not None:
           df['timestamp'] = df['timestamp'].tz_localize(None)
@@ -102,7 +102,7 @@ def engineer_feature(data):
     # calculating the velocity spike for a particular user
     if 'customer_id' in df.columns:
         for idx, row in df.iterrowss():
-            customer_id = row['cutomer_id']
+            customer_id = row['customer_id']
             tnx_time = row['timestamp']
 
             # get velocity for the user
@@ -118,7 +118,7 @@ def engineer_feature(data):
     df['low_device_trust'] = (df['device_trust_score'] < 0.5).astype(int)
     df['new_account'] = ((df['account_age_days'] >= 30) & (df['account_age_days'] < 90)).astype(int)
     df['very_new_account'] = (df['account_age_days'] < 30).astype(int)
-    df['velocity_spike'] = (df['txn_velocity_1h'] >=3 ).astype(int)
+    df['velocity_spike'] = (df['tnx_velocity_1h'] >=3 ).astype(int)
 
     return df
 
@@ -138,8 +138,3 @@ def predict_transaction(model, input_data):
     prediction_probability = model.predict_proba(df_engineered)[0][1]
 
     return prediction, prediction_probability
-
-
-
-
-

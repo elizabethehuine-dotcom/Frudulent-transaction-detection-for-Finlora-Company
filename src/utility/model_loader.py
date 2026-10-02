@@ -12,10 +12,14 @@ def load_registered_model():
     model_name = "Fraud_Detection_XGBoost_Pipeline"
     model_version = "latest"
 
-    model_uri = f"models:/{model_name}/{model_version}"
-    model = mlflow.sklearn.load_model(model_uri)
+    model_uri = (
+    f"models:/{model_name}/{model_version}"
+    )
+    model = mlflow.sklearn.load_model(
+        model_uri)
+
+    print( f"Successfully loaded MLflow model: " 
+          f"{model_name}"
+    )
 
     return model
-
-
-load_registered_model()
